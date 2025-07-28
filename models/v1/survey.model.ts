@@ -1,9 +1,10 @@
+
 import { QueryEntity } from "../../entities/core/query.entity";
 import { ResponseEntity } from "../../entities/core/response.entity";
 import { Constants } from "../../utils/constants.util";
 import MasterModel from "../master.model";
 
-export class QuestionModel extends MasterModel {
+export class SurveyModel extends MasterModel {
 
     constructor() {
         super();
@@ -13,35 +14,45 @@ export class QuestionModel extends MasterModel {
         const startMS = new Date().getTime();
         const resModel = { ...ResponseEntity };
         let queryModel = { ...QueryEntity };
-        let query = 'SELECT * FROM election.question_master WHERE ';
+        let query = 'SELECT * FROM election.survey_master WHERE ';
         const values: any[] = [];
         let index = 1;
 
         try {
-            // filter with zone_id
-            if (params.que_id) {
-                query += `que_id = $${index} AND `;
-                values.push(params.que_id);
+            // filter with sur_id
+            if (params.sur_id) {
+                query += `sur_id = $${index} AND `;
+                values.push(params.sur_id);
                 index += 1;
             }
 
-            if (params.election_id) {
-                query += `election_id = $${index} AND `;
-                values.push(params.election_id);
+            if (params.citizen_name) {
+                query += `citizen_name = $${index} AND `;
+                values.push(params.citizen_name);
                 index += 1;
             }
 
-        
-            // filter with status
-            if (params.status && params.status.length > 0) {
-                const placeholders = params.status.map(() => `$${index++}`).join(', ');
-                query += `status IN (${placeholders}) AND `;
-                values.push(...params.status);
+            if (params.citizen_mobile) {
+                query += `citizen_mobile = $${index} AND `;
+                values.push(params.citizen_mobile);
+                index += 1;
+            }
+
+            if (params.ot_id) {
+                query += `ot_id = $${index} AND `;
+                values.push(params.ot_id);
+                index += 1;
+            }
+
+            if (params.booth_id) {
+                query += `booth_id = $${index} AND `;
+                values.push(params.booth_id);
+                index += 1;
             }
 
             // search filter
             if (params.search) {
-                query += `(s.name LIKE $${index + 1})`;
+                query += `(citizen_name LIKE $${index + 1})`;
                 values.push(`%${params.search}%`);
                 index += 2;
             }
@@ -75,7 +86,7 @@ export class QuestionModel extends MasterModel {
         } catch (error) {
             resModel.status = -33;
             resModel.info = `catch : ${resModel.info} : ${JSON.stringify(error)}`;
-            this.logger.error(`DB Fetch Error: ${query} - Error: ${JSON.stringify(error)}`, 'QuestionModel: fetch');
+            this.logger.error(`DB Fetch Error: ${query} - Error: ${JSON.stringify(error)}`, 'SurveyModel: fetch');
         } finally {
             resModel.tat = (new Date().getTime() - startMS) / 1000;
         }
