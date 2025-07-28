@@ -33,12 +33,12 @@ const dbConfig = {
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000,
     // Remove SSL configuration since server doesn't support it
-    // ssl: {
-    //     rejectUnauthorized: false
-    // }
+    ssl: {
+        rejectUnauthorized: false
+    }
     
     // Option 1: Explicitly disable SSL
-    ssl: false
+    // ssl: false
     
     // Option 2: Conditional SSL based on environment
     // ssl: process.env.NODE_ENV === 'production' ? {

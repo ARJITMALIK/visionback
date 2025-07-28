@@ -54,6 +54,16 @@ class ZoneModel extends master_model_1.default {
                 values.push(params.lok_id);
                 index += 1;
             }
+            if (params.zc_id) {
+                whereConditions.push(`z.zc_id = $${index}`);
+                values.push(params.zc_id);
+                index += 1;
+            }
+            if (params.ot_id) {
+                whereConditions.push(`z.ot_id = $${index}`);
+                values.push(params.ot_id);
+                index += 1;
+            }
             if (params.state) {
                 whereConditions.push(`l.state ILIKE $${index}`);
                 values.push(`%${params.state}%`);

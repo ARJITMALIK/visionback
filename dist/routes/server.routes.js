@@ -17,6 +17,7 @@ const loksabha_controller_1 = require("../controllers/v1/api/loksabha.controller
 const vidhan_controller_1 = require("../controllers/v1/api/vidhan.controller");
 const zone_controller_1 = require("../controllers/v1/api/zone.controller");
 const candidate_controller_1 = require("../controllers/v1/api/candidate.controller");
+const survey_controller_1 = require("../controllers/v1/api/survey.controller");
 const storage = multer_1.default.diskStorage({
     destination: (req, file, cb) => {
         cb(null, "uploads/"); // Ensure this folder exists
@@ -54,13 +55,19 @@ class Routes {
         const vidhanController = new vidhan_controller_1.VidhanController();
         const zoneController = new zone_controller_1.ZoneController();
         const candidateController = new candidate_controller_1.CandidateController();
+        const surveyController = new survey_controller_1.SurveyController();
         //auth routes
         this.router.get(`/login`, authController.fetchAuth);
         //users routes
         this.router.get(`/users`, usersController.fetchUsers);
         this.router.post(`/add-user`, usersController.createUsers);
+        this.router.post(`/user-login`, usersController.loginUser);
         this.router.put(`/user/:id`, usersController.updateUsers);
         this.router.delete(`/user/:id`, usersController.deleteUsers);
+        // survey routes
+        this.router.get(`/surveys`, surveyController.fetchSurveys);
+        this.router.post(`/survey`, surveyController.createSurvey);
+        // this.router.put(`/user/:id`, usersController.updateUsers);
         //emoji routes
         this.router.get(`/emojis`, emojiController.fetchEmoji);
         this.router.post(`/add-emoji`, emojiController.createEmoji);

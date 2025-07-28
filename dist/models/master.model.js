@@ -25,27 +25,52 @@ class MasterModel {
             const columns = Object.keys(payload);
             const values = Object.values(payload).map((val) => {
                 if (val === null || val === undefined) {
-                    return "NULL"; // Ensure NULL is correctly inserted
+                    return "NULL"; // Handle null values
                 }
-                else if (Array.isArray(val)) {
-                    return `ARRAY[${val.map((v) => `'${v}'`).join(", ")}]::text[]`;
+                if (typeof val === "number") {
+                    return `${val}`; // Handle numbers directly
                 }
-                else if (val instanceof Date) {
-                    return `'${val.toISOString().split("T")[0]}'::DATE`;
+                if (val instanceof Date) {
+                    return `'${val.toISOString().split("T")[0]}'::DATE`; // Handle dates
                 }
-                else if (typeof val === "object") {
+                if (Array.isArray(val)) {
+                    // This correctly handles a true JavaScript array of objects
+                    const arrayValues = val.map(item => `'${JSON.stringify(item).replace(/'/g, "''")}'`).join(',');
+                    return `ARRAY[${arrayValues}]::json[]`;
+                }
+                if (typeof val === 'object') {
+                    // This handles a single JavaScript object for a json or jsonb column
                     return `'${JSON.stringify(val)}'::jsonb`;
                 }
-                else if (typeof val === "number") {
-                    return `${val}`; // Avoid wrapping numbers in quotes
+                if (typeof val === 'string') {
+                    // ### START OF NEW LOGIC ###
+                    const trimmedVal = val.trim();
+                    // Check if the string looks like it could be a JSON array
+                    if (trimmedVal.startsWith('[') && trimmedVal.endsWith(']')) {
+                        try {
+                            // Attempt to parse the string into an object
+                            const parsedArray = JSON.parse(trimmedVal);
+                            // If it parses successfully into a JavaScript array...
+                            if (Array.isArray(parsedArray)) {
+                                // ...then format it as a PostgreSQL json[] array literal.
+                                const arrayValues = parsedArray.map(item => `'${JSON.stringify(item).replace(/'/g, "''")}'`).join(',');
+                                return `ARRAY[${arrayValues}]::json[]`;
+                            }
+                        }
+                        catch (e) {
+                            // It looked like a JSON array, but parsing failed.
+                            // Fall through to be treated as a regular string below.
+                        }
+                    }
+                    // ### END OF NEW LOGIC ###
+                    // If the string is not a valid JSON array, treat it as a regular text value.
+                    return `'${this.methods._SQLTEXT_HANDLE(val)}'`;
                 }
-                else {
-                    return `'${this.methods._SQLTEXT_HANDLE(`${val}`)}'`;
-                }
+                // Fallback for any other unforeseen data types
+                return `'${this.methods._SQLTEXT_HANDLE(`${val}`)}'`;
             });
-            // Construct the SQL query
+            // Construct and execute the SQL query
             query = `INSERT INTO ${schema}.${table} (${columns.join(", ")}) VALUES (${values.join(", ")}) RETURNING ${primary_key} AS id`;
-            // Execute the query
             queryModel = await this.sql.executeQuery(query, []);
             if (queryModel.status == constants_util_1.Constants.SUCCESS) {
                 resModel.status = queryModel.status;
