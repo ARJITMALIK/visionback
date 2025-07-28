@@ -12,6 +12,7 @@ import { LoksabhaController } from "../controllers/v1/api/loksabha.controller";
 import { VidhanController } from "../controllers/v1/api/vidhan.controller";
 import { ZoneController } from "../controllers/v1/api/zone.controller";
 import { CandidateController } from "../controllers/v1/api/candidate.controller";
+import { SurveyController } from "../controllers/v1/api/survey.controller";
 
 
 const storage = multer.diskStorage({
@@ -61,6 +62,7 @@ export class Routes {
     const vidhanController = new VidhanController();
     const zoneController = new ZoneController();
     const candidateController = new CandidateController();
+    const surveyController = new SurveyController();
 
     //auth routes
     this.router.get(`/login`,authController.fetchAuth);
@@ -69,8 +71,14 @@ export class Routes {
 
     this.router.get(`/users`, usersController.fetchUsers);
     this.router.post(`/add-user`, usersController.createUsers);
+    this.router.post(`/user-login`, usersController.loginUser);
     this.router.put(`/user/:id`, usersController.updateUsers);
     this.router.delete(`/user/:id`, usersController.deleteUsers);
+
+    // survey routes
+    this.router.get(`/surveys`, surveyController.fetchSurveys);
+    this.router.post(`/survey`, surveyController.createSurvey);
+    // this.router.put(`/user/:id`, usersController.updateUsers);
 
     //emoji routes
     this.router.get(`/emojis`, emojiController.fetchEmoji);
