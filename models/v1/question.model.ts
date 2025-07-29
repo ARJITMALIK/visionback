@@ -24,6 +24,7 @@ export class QuestionModel extends MasterModel {
                 values.push(params.que_id);
                 index += 1;
             }
+
             if (params.election_id) {
                 query += `election_id = $${index} AND `;
                 values.push(params.election_id);
