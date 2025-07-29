@@ -24,6 +24,11 @@ export class UserModel extends MasterModel {
                 values.push(params.user_id);
                 index += 1;
             }
+            if (params.election_id) {
+                query += `election_id = $${index} AND `;
+                values.push(params.election_id);
+                index += 1;
+            }
 
             // filter with name
             if (params.mobile) {

@@ -31,17 +31,6 @@ class AWSUploadController extends master_controller_1.default {
                 Body: file.buffer, // File buffer from multer
                 ContentType: file.mimetype, // Content type
             };
-            // Define the S3 upload parameters for json clones ------------------------
-            const jsonData = this.methods.readExcelFromBuffer(file.buffer);
-            // Convert the JSON data to a buffer to upload as a JSON file
-            const jsonBuffer = Buffer.from(JSON.stringify(jsonData));
-            const jsonFileName = `${Date.now()}-${file.originalname}-json.json`;
-            const jsonUploadParams = {
-                Bucket: process.env.AWS_JSON_BUCKET, // S3 Bucket name
-                Key: jsonFileName, // File name in S3
-                Body: jsonBuffer, // File buffer from multer
-                ContentType: 'application/json', // Content type
-            };
             // Initialize S3 Client (for SDK v3)
             const s3Client = new client_s3_1.S3Client({
                 region: process.env.AWS_REGION,
@@ -51,14 +40,11 @@ class AWSUploadController extends master_controller_1.default {
                 }
             });
             const command = new client_s3_1.PutObjectCommand(uploadParams);
-            const jsonCommand = new client_s3_1.PutObjectCommand(jsonUploadParams);
             await s3Client.send(command);
-            await s3Client.send(jsonCommand);
             resModel.data = {
                 fileName: file.originalname,
                 fileUrl: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`,
                 key: file.filename,
-                json: jsonData
             };
             resModel.status = 1;
             resModel.info = "File uploaded successfully";

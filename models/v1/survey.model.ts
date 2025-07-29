@@ -14,7 +14,7 @@ export class SurveyModel extends MasterModel {
         const startMS = new Date().getTime();
         const resModel = { ...ResponseEntity };
         let queryModel = { ...QueryEntity };
-        let query = 'SELECT * FROM election.survey_master WHERE ';
+        let query = 'SELECT * FROM election.survery_master WHERE ';
         const values: any[] = [];
         let index = 1;
 

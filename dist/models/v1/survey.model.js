@@ -16,7 +16,7 @@ class SurveyModel extends master_model_1.default {
         const startMS = new Date().getTime();
         const resModel = { ...response_entity_1.ResponseEntity };
         let queryModel = { ...query_entity_1.QueryEntity };
-        let query = 'SELECT * FROM election.survey_master WHERE ';
+        let query = 'SELECT * FROM election.survery_master WHERE ';
         const values = [];
         let index = 1;
         try {
