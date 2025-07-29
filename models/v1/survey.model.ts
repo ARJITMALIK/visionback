@@ -1,4 +1,3 @@
-
 import { QueryEntity } from "../../entities/core/query.entity";
 import { ResponseEntity } from "../../entities/core/response.entity";
 import { Constants } from "../../utils/constants.util";
@@ -14,55 +13,89 @@ export class SurveyModel extends MasterModel {
         const startMS = new Date().getTime();
         const resModel = { ...ResponseEntity };
         let queryModel = { ...QueryEntity };
-        let query = 'SELECT * FROM election.survery_master WHERE ';
+        
+        let query = `
+            SELECT 
+                sm.*,
+                u1.name as ot_name,
+                u1.mobile as ot_mobile,
+                u1.profile as ot_profile,
+                u1.role as ot_role,
+                u1.parent as ot_parent_id,
+                u2.name as ot_parent_name,
+                u2.mobile as ot_parent_mobile,
+                u2.profile as ot_parent_profile,
+                u2.role as ot_parent_role
+            FROM election.survery_master sm
+            LEFT JOIN users.users_master u1 ON sm.ot_id = u1.user_id
+            LEFT JOIN users.users_master u2 ON u1.parent = u2.user_id
+            WHERE 1=1
+        `;
+        
         const values: any[] = [];
         let index = 1;
 
         try {
             // filter with sur_id
             if (params.sur_id) {
-                query += `sur_id = $${index} AND `;
+                query += ` AND sm.sur_id = $${index}`;
                 values.push(params.sur_id);
                 index += 1;
             }
 
             if (params.citizen_name) {
-                query += `citizen_name = $${index} AND `;
+                query += ` AND sm.citizen_name = $${index}`;
                 values.push(params.citizen_name);
                 index += 1;
             }
 
             if (params.citizen_mobile) {
-                query += `citizen_mobile = $${index} AND `;
+                query += ` AND sm.citizen_mobile = $${index}`;
                 values.push(params.citizen_mobile);
+                index += 1;
+            }
+            
+            if (params.election_id) {
+                query += ` AND sm.election_id = $${index}`;
+                values.push(params.election_id);
                 index += 1;
             }
 
             if (params.ot_id) {
-                query += `ot_id = $${index} AND `;
+                query += ` AND sm.ot_id = $${index}`;
                 values.push(params.ot_id);
                 index += 1;
             }
 
             if (params.booth_id) {
-                query += `booth_id = $${index} AND `;
+                query += ` AND sm.booth_id = $${index}`;
                 values.push(params.booth_id);
                 index += 1;
             }
 
-            // search filter
+            // search filter - now includes user names as well
             if (params.search) {
-                query += `(citizen_name LIKE $${index + 1})`;
+                query += ` AND (sm.citizen_name LIKE $${index} OR u1.name LIKE $${index} OR u2.name LIKE $${index})`;
                 values.push(`%${params.search}%`);
-                index += 2;
+                index += 1;
             }
 
-            // Remove trailing 'AND' or 'WHERE' if no conditions are applied
-            query = query.endsWith('WHERE ') ? query.slice(0, -6) : query.slice(0, -4);
-
-            // sorting
+            // sorting - handle both survey fields and joined user fields
             if (params.sorting_type && params.sorting_field) {
-                query += ` ORDER BY ${params.sorting_field} ${params.sorting_type}`;
+                let sortField = params.sorting_field;
+                
+                // Map sorting fields to include table aliases
+                if (['sur_id', 'citizen_name', 'citizen_mobile', 'election_id', 'ot_id', 'booth_id'].includes(params.sorting_field)) {
+                    sortField = `sm.${params.sorting_field}`;
+                } else if (['ot_name', 'ot_mobile', 'ot_profile', 'ot_role'].includes(params.sorting_field)) {
+                    // These are already aliased in SELECT
+                    sortField = params.sorting_field;
+                } else if (['ot_parent_name', 'ot_parent_mobile', 'ot_parent_profile', 'ot_parent_role'].includes(params.sorting_field)) {
+                    // These are already aliased in SELECT
+                    sortField = params.sorting_field;
+                }
+                
+                query += ` ORDER BY ${sortField} ${params.sorting_type}`;
             }
 
             // pagination

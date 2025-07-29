@@ -5,4 +5,5 @@ export const ResponseEntity = {
     endDT: new Date(),
     tat: 0,
     data: {},
+    recordCount: 0,
 };
