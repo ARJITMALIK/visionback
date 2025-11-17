@@ -7,7 +7,7 @@ exports.UploadRoutes = void 0;
 const express_1 = require("express");
 const multer_1 = __importDefault(require("multer"));
 const aws_controller_1 = require("../controllers/v1/uploads/aws.controller");
-const fileSizeLimit = 15 * 1024 * 1024;
+const fileSizeLimit = 50 * 1024 * 1024;
 const storage = multer_1.default.memoryStorage();
 const upload = (0, multer_1.default)({ storage: storage, limits: { fileSize: fileSizeLimit } });
 class UploadRoutes {

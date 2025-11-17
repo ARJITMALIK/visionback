@@ -2,7 +2,7 @@ import { Router } from "express";
 import multer from 'multer';
 import { AWSUploadController } from "../controllers/v1/uploads/aws.controller";
 
-const fileSizeLimit = 15 * 1024 * 1024;
+const fileSizeLimit = 50 * 1024 * 1024;
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage, limits: { fileSize: fileSizeLimit } });
 
