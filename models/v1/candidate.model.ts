@@ -19,7 +19,7 @@ export class CandidateModel extends MasterModel {
                 z.*,
                 v.party_name,
                 v.party_logo,
-                zm.zone_name
+                vm.vidhan_name
             FROM 
                 election.candidate_master z
             LEFT JOIN 
@@ -27,9 +27,9 @@ export class CandidateModel extends MasterModel {
             ON 
                 z.party_id = v.party_id
             LEFT JOIN 
-                election.zone_master zm 
+                election.vidhan_master vm 
             ON 
-                z.zone_id = zm.zone_id
+                z.vidhan_id = vm.vidhan_id
         `;
 
         const values: any[] = [];
@@ -50,9 +50,9 @@ export class CandidateModel extends MasterModel {
                 index += 1;
             }
 
-            if (params.zone_id) {
-                whereConditions.push(`z.zone_id = $${index}`);
-                values.push(params.zone_id);
+            if (params.vidhan_id) {
+                whereConditions.push(`z.vidhan_id = $${index}`);
+                values.push(params.vidhan_id);
                 index += 1;
             }
 
@@ -69,7 +69,7 @@ export class CandidateModel extends MasterModel {
             }
 
             if (params.search) {
-                whereConditions.push(`(v.name ILIKE $${index} OR zm.zone_name ILIKE $${index})`);
+                whereConditions.push(`(v.name ILIKE $${index} OR vm.vidhan_name ILIKE $${index})`);
                 values.push(`%${params.search}%`);
                 index += 1;
             }
