@@ -67,6 +67,7 @@ class Routes {
         // survey routes
         this.router.get(`/surveys`, surveyController.fetchSurveys);
         this.router.post(`/survey`, surveyController.createSurvey);
+        this.router.delete(`/survey/:id`, surveyController.deleteSurvey);
         // this.router.get(`/surveys/export-email`, surveyController.exportAndEmailSurveys);
         // this.router.put(`/user/:id`, usersController.updateUsers);
         //emoji routes

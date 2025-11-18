@@ -17,6 +17,7 @@ export class SurveyController extends MasterController {
         this.fetchSurveys = this.fetchSurveys.bind(this);
         this.createSurvey = this.createSurvey.bind(this);
         this.updateSurvey = this.updateSurvey.bind(this);
+        this.deleteSurvey = this.deleteSurvey.bind(this);
     }
 
     async fetchSurveys(req: Request, res: Response) {
@@ -99,6 +100,23 @@ export class SurveyController extends MasterController {
             resModel.status = -9;
             resModel.info = "catch: " + error + " : " + resModel.info;
             this.logger.error(JSON.stringify(resModel), `${this.constructor.name} : updateRole`);
+        }
+    }
+
+    async deleteSurvey(req: Request, res: Response) {
+        const startMS = new Date().getTime();
+        let resModel = { ...ResponseEntity }
+        try {
+            resModel = await this.surveyModel.deleteEntity("election", "survey_master", "survey_id", req.params.id);
+
+            resModel.endDT = new Date();
+            resModel.tat = (new Date().getTime() - startMS) / 1000;
+            res.status(Constants.HTTP_OK).json(resModel);
+
+        } catch (error) {
+            resModel.status = -9;
+            resModel.info = "catch: " + error + " : " + resModel.info;
+            this.logger.error(JSON.stringify(resModel), `${this.constructor.name} : deleteSurvey`);
         }
     }
 }

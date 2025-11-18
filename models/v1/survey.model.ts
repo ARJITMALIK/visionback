@@ -17,6 +17,7 @@ export class SurveyModel extends MasterModel {
         let query = `
             SELECT 
                 sm.*,
+                zm.zone_name,
                 u1.name as ot_name,
                 u1.mobile as ot_mobile,
                 u1.profile as ot_profile,
@@ -27,6 +28,7 @@ export class SurveyModel extends MasterModel {
                 u2.profile as ot_parent_profile,
                 u2.role as ot_parent_role
             FROM election.survery_master sm
+            LEFT JOIN election.zone_master zm ON sm.booth_id = zm.zone_id
             LEFT JOIN users.users_master u1 ON sm.ot_id = u1.user_id
             LEFT JOIN users.users_master u2 ON u1.parent = u2.user_id
             WHERE 1=1
