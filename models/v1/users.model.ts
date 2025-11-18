@@ -140,7 +140,7 @@ export class UserModel extends MasterModel {
                 index += 1;
             }
 
-            query += `logged_in = 1 AND `;
+            query += `status = true AND `;
 
             // filter with status
             if (params.status && params.status.length > 0) {
