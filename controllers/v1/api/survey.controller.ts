@@ -18,6 +18,7 @@ export class SurveyController extends MasterController {
         this.createSurvey = this.createSurvey.bind(this);
         this.updateSurvey = this.updateSurvey.bind(this);
         this.deleteSurvey = this.deleteSurvey.bind(this);
+        this.bulkDeleteSurvey = this.bulkDeleteSurvey.bind(this);
     }
 
     async fetchSurveys(req: Request, res: Response) {
