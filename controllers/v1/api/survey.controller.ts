@@ -108,7 +108,7 @@ export class SurveyController extends MasterController {
         const startMS = new Date().getTime();
         let resModel = { ...ResponseEntity }
         try {
-            resModel = await this.surveyModel.deleteEntity("election", "survery_master", "survey_id", req.params.id);
+            resModel = await this.surveyModel.deleteEntity("election", "survery_master", "sur_id", req.params.id);
 
             resModel.endDT = new Date();
             resModel.tat = (new Date().getTime() - startMS) / 1000;
@@ -134,7 +134,7 @@ export class SurveyController extends MasterController {
                 return res.status(Constants.HTTP_BAD_REQUEST).json(resModel);
             }
 
-            resModel = await this.surveyModel.bulkDelete("election", "survery_master", "survey_id", ids);
+            resModel = await this.surveyModel.bulkDelete("election", "survery_master", "sur_id", ids);
 
             resModel.endDT = new Date();
             resModel.tat = (new Date().getTime() - startMS) / 1000;
