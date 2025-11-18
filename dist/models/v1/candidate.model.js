@@ -21,7 +21,7 @@ class CandidateModel extends master_model_1.default {
                 z.*,
                 v.party_name,
                 v.party_logo,
-                zm.zone_name
+                vm.vidhan_name
             FROM 
                 election.candidate_master z
             LEFT JOIN 
@@ -29,9 +29,9 @@ class CandidateModel extends master_model_1.default {
             ON 
                 z.party_id = v.party_id
             LEFT JOIN 
-                election.zone_master zm 
+                election.vidhan_master vm 
             ON 
-                z.zone_id = zm.zone_id
+                z.vidhan_id = vm.vidhan_id
         `;
         const values = [];
         let index = 1;
@@ -48,9 +48,9 @@ class CandidateModel extends master_model_1.default {
                 values.push(params.party_id);
                 index += 1;
             }
-            if (params.zone_id) {
-                whereConditions.push(`z.zone_id = $${index}`);
-                values.push(params.zone_id);
+            if (params.vidhan_id) {
+                whereConditions.push(`z.vidhan_id = $${index}`);
+                values.push(params.vidhan_id);
                 index += 1;
             }
             if (params.status && !Array.isArray(params.status)) {
@@ -64,7 +64,7 @@ class CandidateModel extends master_model_1.default {
                 values.push(...params.status);
             }
             if (params.search) {
-                whereConditions.push(`(v.name ILIKE $${index} OR zm.zone_name ILIKE $${index})`);
+                whereConditions.push(`(v.name ILIKE $${index} OR vm.vidhan_name ILIKE $${index})`);
                 values.push(`%${params.search}%`);
                 index += 1;
             }

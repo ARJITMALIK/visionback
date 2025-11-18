@@ -41,14 +41,14 @@ export class UserModel extends MasterModel {
                 values.push(params.mobile);
                 index += 1;
             }
-             if (params.status) {
+            if (params.status) {
                 query += `status = $${index} AND `;
                 values.push(params.status);
                 index += 1;
             }
-           
 
-        
+
+
             // filter with status
             if (params.status && params.status.length > 0) {
                 const placeholders = params.status.map(() => `$${index++}`).join(', ');
@@ -100,6 +100,8 @@ export class UserModel extends MasterModel {
         return resModel;
     }
 
+    // In your UserModel file
+
     async fetchLogged(params: any, limit: number = 1) {
         const startMS = new Date().getTime();
         const resModel = { ...ResponseEntity };
@@ -122,16 +124,24 @@ export class UserModel extends MasterModel {
                 values.push(params.mobile);
                 index += 1;
             }
-             if (params.status) {
+
+            // <-- START OF ADDED CODE
+            // filter with password
+            if (params.password) {
+                query += `"password" = $${index} AND `; // Checks for the password
+                values.push(params.password);
+                index += 1;
+            }
+            // <-- END OF ADDED CODE
+
+            if (params.status) {
                 query += `status = $${index} AND `;
                 values.push(params.status);
                 index += 1;
             }
 
             query += `logged_in = 1 AND `;
-           
 
-        
             // filter with status
             if (params.status && params.status.length > 0) {
                 const placeholders = params.status.map(() => `$${index++}`).join(', ');
