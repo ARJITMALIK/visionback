@@ -107,7 +107,7 @@ export class SurveyController extends MasterController {
         const startMS = new Date().getTime();
         let resModel = { ...ResponseEntity }
         try {
-            resModel = await this.surveyModel.deleteEntity("election", "survey_master", "survey_id", req.params.id);
+            resModel = await this.surveyModel.deleteEntity("election", "survery_master", "survey_id", req.params.id);
 
             resModel.endDT = new Date();
             resModel.tat = (new Date().getTime() - startMS) / 1000;
@@ -117,6 +117,34 @@ export class SurveyController extends MasterController {
             resModel.status = -9;
             resModel.info = "catch: " + error + " : " + resModel.info;
             this.logger.error(JSON.stringify(resModel), `${this.constructor.name} : deleteSurvey`);
+        }
+    }
+
+    async bulkDeleteSurvey(req: Request, res: Response) {
+        const startMS = new Date().getTime();
+        let resModel = { ...ResponseEntity };
+        try {
+            const { ids } = req.body; // Destructure the 'ids' array from the request body
+
+            if (!ids || !Array.isArray(ids)) {
+                resModel.status = Constants.ERROR;
+                resModel.info = "Invalid payload: 'ids' must be an array.";
+                resModel.tat = (new Date().getTime() - startMS) / 1000;
+                return res.status(Constants.HTTP_BAD_REQUEST).json(resModel);
+            }
+
+            resModel = await this.surveyModel.bulkDelete("election", "survery_master", "survey_id", ids);
+
+            resModel.endDT = new Date();
+            resModel.tat = (new Date().getTime() - startMS) / 1000;
+            res.status(Constants.HTTP_OK).json(resModel);
+
+        } catch (error) {
+            resModel.status = -9;
+            resModel.info = "catch: " + error + " : " + resModel.info;
+            this.logger.error(JSON.stringify(resModel), `${this.constructor.name} : bulkDeleteSurvey`);
+            // Ensure response is sent even in catch block
+            res.status(Constants.HTTP_INTERNAL_SERVER_ERROR).json(resModel);
         }
     }
 }
