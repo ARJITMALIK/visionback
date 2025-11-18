@@ -90,7 +90,14 @@ class UsersController extends master_controller_1.default {
         let payload;
         try {
             payload = req.body;
-            resModel = await this.UsersModel.updateEntity("users", "users_master", { user_id: req.params.id }, payload);
+            // Special condition: if 'status' is in the payload, update the user and all their children.
+            if (payload.status !== undefined) {
+                resModel = await this.UsersModel.updateUserAndChildren(req.params.id, payload);
+            }
+            else {
+                // Original behavior for updates that don't involve a status change.
+                resModel = await this.UsersModel.updateEntity("users", "users_master", { user_id: req.params.id }, payload);
+            }
             resModel.endDT = new Date();
             resModel.tat = (new Date().getTime() - startMS) / 1000;
             res.status(constants_util_1.Constants.HTTP_OK).json(resModel);

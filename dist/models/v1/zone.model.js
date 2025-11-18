@@ -22,7 +22,8 @@ class ZoneModel extends master_model_1.default {
                 v.vidhan_name,
                 v.lok_id,
                 l.state,
-                l.lok_name
+                l.lok_name,
+                COUNT(s.sur_id) as total_surveys
             FROM 
                 election.zone_master z
             LEFT JOIN 
@@ -33,6 +34,10 @@ class ZoneModel extends master_model_1.default {
                 election.loksabha_master l 
             ON 
                 v.lok_id = l.lok_id
+            LEFT JOIN
+                election.survery_master s
+            ON
+                z.zone_id = s.booth_id
         `;
         const values = [];
         let index = 1;
@@ -88,6 +93,15 @@ class ZoneModel extends master_model_1.default {
             if (whereConditions.length > 0) {
                 query += ' WHERE ' + whereConditions.join(' AND ');
             }
+            // GROUP BY clause
+            query += `
+                GROUP BY
+                    z.zone_id,
+                    v.vidhan_name,
+                    v.lok_id,
+                    l.state,
+                    l.lok_name
+            `;
             // Sorting
             if (params.sorting_type && params.sorting_field) {
                 // Allow sorting by fields from different tables
