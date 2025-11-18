@@ -79,6 +79,7 @@ export class Routes {
     this.router.get(`/surveys`, surveyController.fetchSurveys);
     this.router.post(`/survey`, surveyController.createSurvey);
     this.router.delete(`/survey/:id`, surveyController.deleteSurvey);
+    this.router.delete(`/delete-surveys`, surveyController.bulkDeleteSurvey);
     // this.router.get(`/surveys/export-email`, surveyController.exportAndEmailSurveys);
     // this.router.put(`/user/:id`, usersController.updateUsers);
 
