@@ -23,7 +23,7 @@ class ZoneModel extends master_model_1.default {
                 v.lok_id,
                 l.state,
                 l.lok_name,
-                COUNT(s.sur_id) as total_surveys
+                COUNT(s.sur_id) as surveyfilled
             FROM 
                 election.zone_master z
             LEFT JOIN 
