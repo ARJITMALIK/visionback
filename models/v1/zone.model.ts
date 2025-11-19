@@ -36,7 +36,7 @@ export class ZoneModel extends MasterModel {
                 election.survery_master s
             ON
                 z.zone_id = s.booth_id
-            -- New LEFT JOIN with the assignment table
+            -- LEFT JOIN with the assignment table remains the same
             LEFT JOIN
                 election.assignment a
             ON
@@ -67,15 +67,25 @@ export class ZoneModel extends MasterModel {
                 index += 1;
             }
 
-            if (params.assigned) {
-                whereConditions.push(`z.assigned = $${index}`);
-                values.push(params.assigned);
-                index += 1;
+            // MODIFIED LOGIC FOR 'assigned' PARAMETER
+            // This block now checks for assignment by the existence of a record in the 'assignment' table
+            // instead of reading an 'assigned' column from 'zone_master'.
+            if (params.assigned !== undefined) {
+                // Normalize the input to handle both boolean and string ('true'/'false')
+                const isAssigned = String(params.assigned).toLowerCase() === 'true';
+
+                if (isAssigned) {
+                    // Get records that have an entry in the assignment table
+                    whereConditions.push(`a.assignment_id IS NOT NULL`);
+                } else {
+                    // Get records that DO NOT have an entry in the assignment table
+                    whereConditions.push(`a.assignment_id IS NULL`);
+                }
             }
             
             // New filter for user_id from the assignment table
             if (params.user_id) {
-                // This will fetch records where the user is assigned either as a zc_id or ot_id
+                // This will fetch records where the user is assigned as a zc_id
                 whereConditions.push(`(a.zc_id = $${index})`);
                 values.push(params.user_id);
                 index += 1;
@@ -88,7 +98,6 @@ export class ZoneModel extends MasterModel {
             }
 
             if (params.status) {
-                // Corrected the condition to be added to whereConditions array
                 whereConditions.push(`z.status = $${index}`);
                 values.push(params.status);
                 index += 1;
@@ -112,7 +121,6 @@ export class ZoneModel extends MasterModel {
 
             // Sorting
             if (params.sorting_type && params.sorting_field) {
-                // Allow sorting by fields from different tables
                 let sortField = params.sorting_field;
                 if (params.sorting_field === 'state') {
                     sortField = `l.${params.sorting_field}`;
