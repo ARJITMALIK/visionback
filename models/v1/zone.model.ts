@@ -36,6 +36,11 @@ export class ZoneModel extends MasterModel {
                 election.survery_master s
             ON
                 z.zone_id = s.booth_id
+            -- New LEFT JOIN with the assignment table
+            LEFT JOIN
+                election.assignment a
+            ON
+                z.zone_id = a.booth_id
         `;
 
         const values: any[] = [];
@@ -62,15 +67,17 @@ export class ZoneModel extends MasterModel {
                 index += 1;
             }
 
-            if (params.zc_id) {
-                whereConditions.push(`z.zc_id = $${index}`);
-                values.push(params.zc_id);
+            if (params.assigned) {
+                whereConditions.push(`z.assigned = $${index}`);
+                values.push(params.assigned);
                 index += 1;
             }
-
-            if (params.ot_id) {
-                whereConditions.push(`z.ot_id = $${index}`);
-                values.push(params.ot_id);
+            
+            // New filter for user_id from the assignment table
+            if (params.user_id) {
+                // This will fetch records where the user is assigned either as a zc_id or ot_id
+                whereConditions.push(`(a.zc_id = $${index})`);
+                values.push(params.user_id);
                 index += 1;
             }
 
@@ -80,21 +87,10 @@ export class ZoneModel extends MasterModel {
                 index += 1;
             }
 
-            if (params.status && !Array.isArray(params.status)) {
-                whereConditions.push(`v.status = $${index}`);
+            if (params.status) {
+                // Corrected the condition to be added to whereConditions array
+                whereConditions.push(`z.status = $${index}`);
                 values.push(params.status);
-                index += 1;
-            }
-
-            if (params.status && Array.isArray(params.status) && params.status.length > 0) {
-                const placeholders = params.status.map(() => `$${index++}`).join(', ');
-                whereConditions.push(`v.status IN (${placeholders})`);
-                values.push(...params.status);
-            }
-
-            if (params.search) {
-                whereConditions.push(`v.name ILIKE $${index}`);
-                values.push(`%${params.search}%`);
                 index += 1;
             }
 

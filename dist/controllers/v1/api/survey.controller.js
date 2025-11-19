@@ -17,6 +17,7 @@ class SurveyController extends master_controller_1.default {
         this.createSurvey = this.createSurvey.bind(this);
         this.updateSurvey = this.updateSurvey.bind(this);
         this.deleteSurvey = this.deleteSurvey.bind(this);
+        this.bulkDeleteSurvey = this.bulkDeleteSurvey.bind(this);
     }
     async fetchSurveys(req, res) {
         const startMS = new Date().getTime();
@@ -94,7 +95,7 @@ class SurveyController extends master_controller_1.default {
         const startMS = new Date().getTime();
         let resModel = { ...response_entity_1.ResponseEntity };
         try {
-            resModel = await this.surveyModel.deleteEntity("election", "survey_master", "survey_id", req.params.id);
+            resModel = await this.surveyModel.deleteEntity("election", "survery_master", "sur_id", req.params.id);
             resModel.endDT = new Date();
             resModel.tat = (new Date().getTime() - startMS) / 1000;
             res.status(constants_util_1.Constants.HTTP_OK).json(resModel);
@@ -103,6 +104,30 @@ class SurveyController extends master_controller_1.default {
             resModel.status = -9;
             resModel.info = "catch: " + error + " : " + resModel.info;
             this.logger.error(JSON.stringify(resModel), `${this.constructor.name} : deleteSurvey`);
+        }
+    }
+    async bulkDeleteSurvey(req, res) {
+        const startMS = new Date().getTime();
+        let resModel = { ...response_entity_1.ResponseEntity };
+        try {
+            const { ids } = req.body; // Destructure the 'ids' array from the request body
+            if (!ids || !Array.isArray(ids)) {
+                resModel.status = constants_util_1.Constants.ERROR;
+                resModel.info = "Invalid payload: 'ids' must be an array.";
+                resModel.tat = (new Date().getTime() - startMS) / 1000;
+                return res.status(constants_util_1.Constants.HTTP_BAD_REQUEST).json(resModel);
+            }
+            resModel = await this.surveyModel.bulkDelete("election", "survery_master", "sur_id", ids);
+            resModel.endDT = new Date();
+            resModel.tat = (new Date().getTime() - startMS) / 1000;
+            res.status(constants_util_1.Constants.HTTP_OK).json(resModel);
+        }
+        catch (error) {
+            resModel.status = -9;
+            resModel.info = "catch: " + error + " : " + resModel.info;
+            this.logger.error(JSON.stringify(resModel), `${this.constructor.name} : bulkDeleteSurvey`);
+            // Ensure response is sent even in catch block
+            res.status(constants_util_1.Constants.HTTP_INTERNAL_SERVER_ERROR).json(resModel);
         }
     }
 }

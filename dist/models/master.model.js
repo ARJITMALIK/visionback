@@ -316,5 +316,43 @@ class MasterModel {
         }
         return resModel;
     }
+    async bulkDelete(schema, table, primaryKeyColumn, ids // Expecting an array of IDs
+    ) {
+        const startMS = new Date().getTime();
+        const resModel = { ...response_entity_1.ResponseEntity };
+        let queryModel = { ...query_entity_1.QueryEntity };
+        let query = "";
+        try {
+            // Validate that the ids array is not empty
+            if (!ids || ids.length === 0) {
+                throw new Error("ID array is required and cannot be empty.");
+            }
+            // Construct the DELETE query using the ANY operator for an array parameter.
+            // This is a safe and efficient way to handle bulk deletes.
+            // $1 will be the array of IDs.
+            query = `DELETE FROM ${schema}.${table} WHERE ${primaryKeyColumn} = ANY($1) RETURNING ${primaryKeyColumn} AS id`;
+            // Execute the query, passing the array of IDs as a single parameter
+            queryModel = await this.sql.executeQuery(query, [ids]);
+            if (queryModel.status === constants_util_1.Constants.SUCCESS) {
+                resModel.status = queryModel.status;
+                resModel.info = `OK: Bulk Delete Query successful. Records deleted: ${queryModel.rowCount}`;
+                resModel.data = queryModel;
+            }
+            else {
+                resModel.status = constants_util_1.Constants.ERROR;
+                resModel.info = `ERROR: Bulk Delete Query: ${JSON.stringify(queryModel)}`;
+            }
+        }
+        catch (error) {
+            resModel.status = -33;
+            resModel.info = `catch : ${resModel.info} : ${JSON.stringify(error)}`;
+            console.error(error); // It's good practice to log the actual error object
+            this.logger.error(JSON.stringify(resModel), `${this.constructor.name} : bulkDelete : ${table}`);
+        }
+        finally {
+            resModel.tat = (new Date().getTime() - startMS) / 1000;
+        }
+        return resModel;
+    }
 }
 exports.default = MasterModel;
