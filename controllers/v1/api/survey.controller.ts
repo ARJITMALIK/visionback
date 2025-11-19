@@ -62,14 +62,6 @@ export class SurveyController extends MasterController {
                 return res.status(Constants.HTTP_BAD_REQUEST).json(resModel);
             }
 
-            // check if the role exists
-            // let user: any = await this.surveyModel.fetch({ citizen_mobile: payload.citizen_mobile })
-            // if (user.data.rowCount != 0) {
-            //     resModel.status = -9;
-            //     resModel.info = "error: " + "Survey already exists";
-            //     return res.status(Constants.HTTP_CONFLICT).json(resModel);
-            // }
-
             resModel = await this.surveyModel.createEntity(payload, "election", "survery_master", "sur_id");
 
             resModel.endDT = new Date();

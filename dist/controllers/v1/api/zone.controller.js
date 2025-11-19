@@ -17,6 +17,7 @@ class ZoneController extends master_controller_1.default {
         this.createzone = this.createzone.bind(this);
         this.updatezone = this.updatezone.bind(this);
         this.deletezone = this.deletezone.bind(this);
+        this.createAssignments = this.createAssignments.bind(this);
     }
     async fetchzone(req, res) {
         const startMS = new Date().getTime();
@@ -82,6 +83,39 @@ class ZoneController extends master_controller_1.default {
             resModel.status = -9;
             resModel.info = "catch: " + error + " : " + resModel.info;
             this.logger.error(JSON.stringify(resModel), `${this.constructor.name} : deletezone`);
+        }
+    }
+    async createAssignments(req, res) {
+        const startMS = new Date().getTime();
+        let resModel = { ...response_entity_1.ResponseEntity };
+        try {
+            // 1. Extract the 'assignments' array from the request body.
+            const { assignments } = req.body;
+            // 2. Add validation to ensure the payload is correct.
+            if (!assignments || !Array.isArray(assignments) || assignments.length === 0) {
+                resModel.status = constants_util_1.Constants.ERROR;
+                resModel.info = "Request body must contain a non-empty 'assignments' array.";
+                resModel.tat = (new Date().getTime() - startMS) / 1000;
+                // Use 400 for a bad request from the client
+                return res.status(constants_util_1.Constants.HTTP_BAD_REQUEST).json(resModel);
+            }
+            // 3. Call the createMultipleEntities method from the parent model.
+            //    This method is available via `this.zoneModel` because ZoneModel extends MasterModel.
+            resModel = await this.zoneModel.createMultipleEntities(assignments, // The array of { booth_id, zc_id } objects
+            "election", // The database schema
+            "assignment", // The table to insert into
+            "assignment_id" // The primary key to return
+            );
+            resModel.endDT = new Date();
+            resModel.tat = (new Date().getTime() - startMS) / 1000;
+            // Use 201 Created for a successful creation response
+            res.status(constants_util_1.Constants.HTTP_CREATED).json(resModel);
+        }
+        catch (error) {
+            resModel.status = -9;
+            resModel.info = "catch: " + JSON.stringify(error) + " : " + resModel.info;
+            this.logger.error(JSON.stringify(resModel), `${this.constructor.name} : createAssignments`);
+            res.status(constants_util_1.Constants.HTTP_INTERNAL_SERVER_ERROR).json(resModel);
         }
     }
 }

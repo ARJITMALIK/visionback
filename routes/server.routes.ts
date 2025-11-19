@@ -124,6 +124,7 @@ export class Routes {
     this.router.post(`/add-zone`, zoneController.createzone);
     this.router.put(`/zone/:id`, zoneController.updatezone);
     this.router.delete(`/zone/:id`, zoneController.deletezone);
+    this.router.post(`/zone/assignments`, zoneController.createAssignments);
 
     //candidate routes
     this.router.get(`/candidates`, candidateController.fetchcandidate);
