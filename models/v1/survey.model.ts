@@ -85,6 +85,14 @@ export class SurveyModel extends MasterModel {
                 countIndex += 1;
             }
 
+            if (params.ot_parent_name) {
+                whereClause += ` AND u2.name = $${countIndex}`;
+                values.push(params.ot_parent_name);
+                countValues.push(params.ot_parent_name);
+                index += 1;
+                countIndex += 1;
+            }
+
             if (params.ot_id) {
                 whereClause += ` AND sm.ot_id = $${countIndex}`;
                 values.push(params.ot_id);
