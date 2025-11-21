@@ -34,53 +34,91 @@ export class SurveyModel extends MasterModel {
             WHERE 1=1
         `;
         
+        let countQuery = `
+            SELECT COUNT(*) as total
+            FROM election.survery_master sm
+            LEFT JOIN election.zone_master zm ON sm.booth_id = zm.zone_id
+            LEFT JOIN users.users_master u1 ON sm.ot_id = u1.user_id
+            LEFT JOIN users.users_master u2 ON u1.parent = u2.user_id
+            WHERE 1=1
+        `;
+        
         const values: any[] = [];
+        const countValues: any[] = [];
         let index = 1;
+        let countIndex = 1;
 
         try {
+            // Build WHERE conditions
+            let whereClause = '';
+            
             // filter with sur_id
             if (params.sur_id) {
-                query += ` AND sm.sur_id = $${index}`;
+                whereClause += ` AND sm.sur_id = $${countIndex}`;
                 values.push(params.sur_id);
+                countValues.push(params.sur_id);
                 index += 1;
+                countIndex += 1;
             }
 
             if (params.citizen_name) {
-                query += ` AND sm.citizen_name = $${index}`;
+                whereClause += ` AND sm.citizen_name = $${countIndex}`;
                 values.push(params.citizen_name);
+                countValues.push(params.citizen_name);
                 index += 1;
+                countIndex += 1;
             }
 
             if (params.citizen_mobile) {
-                query += ` AND sm.citizen_mobile = $${index}`;
+                whereClause += ` AND sm.citizen_mobile = $${countIndex}`;
                 values.push(params.citizen_mobile);
+                countValues.push(params.citizen_mobile);
                 index += 1;
+                countIndex += 1;
             }
             
             if (params.election_id) {
-                query += ` AND sm.election_id = $${index}`;
+                whereClause += ` AND sm.election_id = $${countIndex}`;
                 values.push(params.election_id);
+                countValues.push(params.election_id);
                 index += 1;
+                countIndex += 1;
             }
 
             if (params.ot_id) {
-                query += ` AND sm.ot_id = $${index}`;
+                whereClause += ` AND sm.ot_id = $${countIndex}`;
                 values.push(params.ot_id);
+                countValues.push(params.ot_id);
                 index += 1;
+                countIndex += 1;
             }
 
             if (params.booth_id) {
-                query += ` AND sm.booth_id = $${index}`;
+                whereClause += ` AND sm.booth_id = $${countIndex}`;
                 values.push(params.booth_id);
+                countValues.push(params.booth_id);
                 index += 1;
+                countIndex += 1;
             }
 
             // search filter - now includes user names as well
             if (params.search) {
-                query += ` AND (sm.citizen_name LIKE $${index} OR u1.name LIKE $${index} OR u2.name LIKE $${index})`;
+                whereClause += ` AND (sm.citizen_name LIKE $${countIndex} OR u1.name LIKE $${countIndex} OR u2.name LIKE $${countIndex})`;
                 values.push(`%${params.search}%`);
+                countValues.push(`%${params.search}%`);
                 index += 1;
+                countIndex += 1;
             }
+
+            // Apply WHERE clause to both queries
+            query += whereClause;
+            countQuery += whereClause;
+
+            // Get total count first
+            const countResult = await this.sql.executeQuery(countQuery, countValues);
+            const totalCount = countResult.status === Constants.SUCCESS && countResult.rows && countResult.rows.length > 0 
+                ? parseInt(countResult.rows[0].total) 
+                : 0;
 
             // sorting - handle both survey fields and joined user fields
             if (params.sorting_type && params.sorting_field) {
@@ -106,14 +144,17 @@ export class SurveyModel extends MasterModel {
                 values.push(parseInt(params.limit), parseInt(params.page || 0) * parseInt(params.limit));
             }
 
-            // Execute the query
+            // Execute the main query
             queryModel = await this.sql.executeQuery(query, values);
 
             // Build the response based on query success or failure
             if (queryModel.status === Constants.SUCCESS) {
                 resModel.status = queryModel.status;
                 resModel.info = `OK: DB Query: ${queryModel.info} : ${queryModel.tat} : ${queryModel.message}`;
-                resModel.data = queryModel;
+                resModel.data = {
+                    ...queryModel,
+                    count: totalCount
+                };
             } else {
                 resModel.status = Constants.ERROR;
                 resModel.info = `ERROR: DB Query: ${JSON.stringify(queryModel)}`;
