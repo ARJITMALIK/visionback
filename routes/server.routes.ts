@@ -13,6 +13,7 @@ import { VidhanController } from "../controllers/v1/api/vidhan.controller";
 import { ZoneController } from "../controllers/v1/api/zone.controller";
 import { CandidateController } from "../controllers/v1/api/candidate.controller";
 import { SurveyController } from "../controllers/v1/api/survey.controller";
+import { AssignmentController } from "../controllers/v1/api/assignment.controller";
 
 
 const storage = multer.diskStorage({
@@ -63,6 +64,7 @@ export class Routes {
     const zoneController = new ZoneController();
     const candidateController = new CandidateController();
     const surveyController = new SurveyController();
+    const assignmentController = new AssignmentController();
 
     //auth routes
     this.router.get(`/login`,authController.fetchAuth);
@@ -124,7 +126,11 @@ export class Routes {
     this.router.post(`/add-zone`, zoneController.createzone);
     this.router.put(`/zone/:id`, zoneController.updatezone);
     this.router.delete(`/zone/:id`, zoneController.deletezone);
+
+    // assigments
     this.router.post(`/zone/assignments`, zoneController.createAssignments);
+    this.router.get(`/zone/assignments`, assignmentController.fetchAssignments);
+    this.router.delete(`/zone/assignment/:id`, assignmentController.deleteAssignments);
 
     //candidate routes
     this.router.get(`/candidates`, candidateController.fetchcandidate);

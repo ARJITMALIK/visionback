@@ -18,6 +18,7 @@ const vidhan_controller_1 = require("../controllers/v1/api/vidhan.controller");
 const zone_controller_1 = require("../controllers/v1/api/zone.controller");
 const candidate_controller_1 = require("../controllers/v1/api/candidate.controller");
 const survey_controller_1 = require("../controllers/v1/api/survey.controller");
+const assignment_controller_1 = require("../controllers/v1/api/assignment.controller");
 const storage = multer_1.default.diskStorage({
     destination: (req, file, cb) => {
         cb(null, "uploads/"); // Ensure this folder exists
@@ -56,6 +57,7 @@ class Routes {
         const zoneController = new zone_controller_1.ZoneController();
         const candidateController = new candidate_controller_1.CandidateController();
         const surveyController = new survey_controller_1.SurveyController();
+        const assignmentController = new assignment_controller_1.AssignmentController();
         //auth routes
         this.router.get(`/login`, authController.fetchAuth);
         //users routes
@@ -106,7 +108,10 @@ class Routes {
         this.router.post(`/add-zone`, zoneController.createzone);
         this.router.put(`/zone/:id`, zoneController.updatezone);
         this.router.delete(`/zone/:id`, zoneController.deletezone);
+        // assigments
         this.router.post(`/zone/assignments`, zoneController.createAssignments);
+        this.router.get(`/zone/assignments`, assignmentController.fetchAssignments);
+        this.router.delete(`/zone/assignment/:id`, assignmentController.deleteAssignments);
         //candidate routes
         this.router.get(`/candidates`, candidateController.fetchcandidate);
         this.router.post(`/add-candidate`, candidateController.createcandidate);
