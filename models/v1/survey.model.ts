@@ -101,6 +101,16 @@ export class SurveyModel extends MasterModel {
                 countIndex += 1;
             }
 
+            if (params.zc_id) {
+                whereClause += ` AND u2.parent = $${countIndex}`;
+                // Assuming params.zc_id is passed here, though original code had ot_id. 
+                // Kept consistent with your provided logic pattern.
+                values.push(params.zc_id); 
+                countValues.push(params.zc_id);
+                index += 1;
+                countIndex += 1;
+            }
+
             if (params.booth_id) {
                 whereClause += ` AND sm.booth_id = $${countIndex}`;
                 values.push(params.booth_id);
@@ -109,9 +119,27 @@ export class SurveyModel extends MasterModel {
                 countIndex += 1;
             }
 
-            // search filter - now includes user names as well
+            // --- DATE FILTERING START ---
+            if (params.start_date) {
+                whereClause += ` AND sm.date >= $${countIndex}`;
+                values.push(params.start_date);
+                countValues.push(params.start_date);
+                index += 1;
+                countIndex += 1;
+            }
+
+            if (params.end_date) {
+                whereClause += ` AND sm.date <= $${countIndex}`;
+                values.push(params.end_date);
+                countValues.push(params.end_date);
+                index += 1;
+                countIndex += 1;
+            }
+            // --- DATE FILTERING END ---
+
+            // search filter - Updated to ILIKE
             if (params.search) {
-                whereClause += ` AND (sm.citizen_name LIKE $${countIndex} OR u1.name LIKE $${countIndex} OR u2.name LIKE $${countIndex})`;
+                whereClause += ` AND (sm.citizen_name ILIKE $${countIndex} OR u1.name ILIKE $${countIndex} OR u2.name ILIKE $${countIndex})`;
                 values.push(`%${params.search}%`);
                 countValues.push(`%${params.search}%`);
                 index += 1;
@@ -128,20 +156,14 @@ export class SurveyModel extends MasterModel {
                 ? parseInt(countResult.rows[0].total) 
                 : 0;
 
-            // sorting - handle both survey fields and joined user fields
+            // sorting
             if (params.sorting_type && params.sorting_field) {
                 let sortField = params.sorting_field;
                 
-                // Map sorting fields to include table aliases
-                if (['sur_id', 'citizen_name', 'citizen_mobile', 'election_id', 'ot_id', 'booth_id'].includes(params.sorting_field)) {
+                if (['sur_id', 'citizen_name', 'citizen_mobile', 'election_id', 'ot_id', 'booth_id', 'date'].includes(params.sorting_field)) {
                     sortField = `sm.${params.sorting_field}`;
-                } else if (['ot_name', 'ot_mobile', 'ot_profile', 'ot_role'].includes(params.sorting_field)) {
-                    // These are already aliased in SELECT
-                    sortField = params.sorting_field;
-                } else if (['ot_parent_name', 'ot_parent_mobile', 'ot_parent_profile', 'ot_parent_role'].includes(params.sorting_field)) {
-                    // These are already aliased in SELECT
-                    sortField = params.sorting_field;
-                }
+                } 
+                // No change needed for aliased fields
                 
                 query += ` ORDER BY ${sortField} ${params.sorting_type}`;
             }
@@ -155,7 +177,6 @@ export class SurveyModel extends MasterModel {
             // Execute the main query
             queryModel = await this.sql.executeQuery(query, values);
 
-            // Build the response based on query success or failure
             if (queryModel.status === Constants.SUCCESS) {
                 resModel.status = queryModel.status;
                 resModel.info = `OK: DB Query: ${queryModel.info} : ${queryModel.tat} : ${queryModel.message}`;
