@@ -102,9 +102,7 @@ export class SurveyModel extends MasterModel {
             }
 
             if (params.zc_id) {
-                whereClause += ` AND u2.parent = $${countIndex}`;
-                // Assuming params.zc_id is passed here, though original code had ot_id. 
-                // Kept consistent with your provided logic pattern.
+                whereClause += ` AND u1.parent = $${countIndex}`;
                 values.push(params.zc_id); 
                 countValues.push(params.zc_id);
                 index += 1;
